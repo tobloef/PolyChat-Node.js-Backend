@@ -1,6 +1,5 @@
 ;(function() {
 	module.exports = {
-		port: 3000,
-		//path: "node"
+		port: 3000
 	};
 }());

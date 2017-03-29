@@ -83,7 +83,7 @@
 
 	function nicknameAvailable(nickname) {
 		for (let i = 0; i < clients.length; i++) {
-			if (clients[i].nickname === nickname) {
+			if (clients[i].nickname.toLowerCase() === nickname.toLowerCase()) {
 				return false;
 			}
 		}

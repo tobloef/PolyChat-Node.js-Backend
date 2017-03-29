@@ -10,31 +10,47 @@
 		ws.on("message", function(data) {
 			const parsed = JSON.parse(data);
 			switch (parsed.type) {
-				case "connected":
-					console.log(`${parsed.data} connected`);
-					clients.push({
-						nickname: parsed.data,
-						ws
-					});
-					broadcast(JSON.stringify({
-						type: "onlineCount",
-						data: clients.length
-					}));
-					broadcast(JSON.stringify({
-						type: "connected",
-						data: parsed.data
-					}));
+				case "connect":
+					if (nicknameAvailable(parsed.data)) {
+						console.log(`${parsed.data} connected`);
+						clients.push({
+							nickname: parsed.data,
+							ws
+						});
+						ws.send(JSON.stringify({
+							type: "connectResponse",
+							data: "ready"
+						}));
+						broadcast(JSON.stringify({
+							type: "onlineCount",
+							data: clients.length
+						}));
+						broadcast(JSON.stringify({
+							type: "connected",
+							data: parsed.data
+						}));
+					} else {
+						ws.send(JSON.stringify({
+							type: "connectResponse",
+							data: "nicknameTaken"
+						}));
+					}
 					break;
 				case "message":
-					const message = parsed.data;
-					console.log(`${message.nickname}: ${message.message}`);
-					broadcastToOthers(ws, data);
-					break;
+					for (let i = 0; i < clients.length; i++) {
+						if (clients[i].ws === ws) {
+							const message = parsed.data;
+							console.log(`${message.nickname}: ${message.message}`);
+							broadcastToOthers(ws, data);
+						}
+					}
+				break;
 			}
 		});
 		ws.on("close", function(code, reason) {
 			for (let i = 0; i < clients.length; i++) {
 				if (clients[i].ws === ws) {
+					console.log(`${parsed.data} disconnected`);
 					broadcast(JSON.stringify({
 						type: "disconnected",
 						data: clients[i].nickname
@@ -63,5 +79,14 @@
 				client.send(data);
 			}
 		});
+	}
+
+	function nicknameAvailable(nickname) {
+		for (let i = 0; i < clients.length; i++) {
+			if (clients[i].nickname === nickname) {
+				return false;
+			}
+		}
+		return true;
 	}
 }());

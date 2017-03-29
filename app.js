@@ -50,7 +50,7 @@
 		ws.on("close", function(code, reason) {
 			for (let i = 0; i < clients.length; i++) {
 				if (clients[i].ws === ws) {
-					console.log(`${parsed.data} disconnected`);
+					console.log(`${clients[i].nickname} disconnected`);
 					broadcast(JSON.stringify({
 						type: "disconnected",
 						data: clients[i].nickname

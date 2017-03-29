@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/tobloef/PolyChat-Node.js-Backend/issues"
   },
-  "homepage": "https://github.com/tobloef/PolyChat-Node.js-Backend#readme"
+  "homepage": "https://github.com/tobloef/PolyChat-Node.js-Backend#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "ws": "^2.2.2"
+  }
 }

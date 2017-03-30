@@ -3,67 +3,81 @@
 	const config = require("./config");
 
 	const wss = new WebSocket.Server(config);
-
 	const clients = [];
 
 	wss.on("connection", function(ws) {
 		ws.on("message", function(data) {
-			const parsed = JSON.parse(data);
-			switch (parsed.type) {
-				case "connect":
-					if (nicknameAvailable(parsed.data)) {
-						console.log(`${parsed.data} connected`);
-						clients.push({
-							nickname: parsed.data,
-							ws
-						});
-						ws.send(JSON.stringify({
-							type: "connectResponse",
-							data: "ready"
-						}));
-						broadcast(JSON.stringify({
-							type: "onlineCount",
-							data: clients.length
-						}));
-						broadcast(JSON.stringify({
-							type: "connected",
-							data: parsed.data
-						}));
-					} else {
-						ws.send(JSON.stringify({
-							type: "connectResponse",
-							data: "nicknameTaken"
-						}));
-					}
-					break;
-				case "message":
-					for (let i = 0; i < clients.length; i++) {
-						if (clients[i].ws === ws) {
-							const message = parsed.data;
-							console.log(`${message.nickname}: ${message.message}`);
-							broadcastToOthers(ws, data);
-						}
-					}
-				break;
-			}
+			onMessage(data, ws);
 		});
-		ws.on("close", function(code, reason) {
-			for (let i = 0; i < clients.length; i++) {
-				if (clients[i].ws === ws) {
-					console.log(`${clients[i].nickname} disconnected`);
-					broadcast(JSON.stringify({
-						type: "disconnected",
-						data: clients[i].nickname
-					}));
-					clients.splice(i, 1);
-					broadcast(JSON.stringify({
-						type: "onlineCount",
-						data: clients.length
-					}));
-				}
-			}
+		ws.on("close", function() {
+			onClose(ws);
 		});
 	});
+
+	function onClose(ws) {
+		for (let i = 0; i < clients.length; i++) {
+			if (clients[i].ws === ws) {
+				console.log(`${clients[i].nickname} disconnected`);
+				broadcast(JSON.stringify({
+					type: "disconnected",
+					data: clients[i].nickname
+				}));
+				clients.splice(i, 1);
+				broadcast(JSON.stringify({
+					type: "onlineCount",
+					data: clients.length
+				}));
+			}
+		}
+	}
+
+	function onMessage(data, ws) {
+		const event = JSON.parse(data);
+		switch (event.type) {
+			case "connect":
+				connectEvent(event, ws);
+				break;
+			case "message":
+				messageEvent(event, ws);
+			break;
+		}
+	}
+
+	function messageEvent(event, ws) {
+		for (let i = 0; i < clients.length; i++) {
+			if (clients[i].ws === ws) {
+				console.log(`${event.data.nickname}: ${event.data.message}`);
+				broadcastToOthers(ws, event);
+			}
+		}
+	}
+
+	function connectEvent(event, ws) {
+		if (nicknameAvailable(event.data)) {
+			console.log(`${event.data} connected`);
+			clients.push({
+				nickname: event.data,
+				ws
+			});
+			ws.send(JSON.stringify({
+				type: "connectResponse",
+				data: "ready"
+			}));
+			broadcast(JSON.stringify({
+				type: "onlineCount",
+				data: clients.length
+			}));
+			broadcast(JSON.stringify({
+				type: "connected",
+				data: event.data
+			}));
+		} else {
+			ws.send(JSON.stringify({
+				type: "connectResponse",
+				data: "nicknameTaken"
+			}));
+		}
+	}
 
 	function broadcast(data) {
 		wss.clients.forEach(function each(client) {

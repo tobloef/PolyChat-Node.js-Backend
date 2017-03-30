@@ -5,6 +5,7 @@
 	const wss = new WebSocket.Server(config);
 	const clients = [];
 
+	// Set up WebSocket handlers.
 	wss.on("connection", function(ws) {
 		ws.on("message", function(data) {
 			onMessage(data, ws);
@@ -14,6 +15,7 @@
 		});
 	});
 
+	// When the WebSocket connection closes.
 	function onClose(ws) {
 		for (let i = 0; i < clients.length; i++) {
 			if (clients[i].ws === ws) {
@@ -31,6 +33,7 @@
 		}
 	}
 
+	// When the WebSocket recieves any message.
 	function onMessage(data, ws) {
 		const event = JSON.parse(data);
 		switch (event.type) {
@@ -43,6 +46,7 @@
 		}
 	}
 
+	// When the server recieves a new chat message.
 	function messageEvent(event, ws) {
 		for (let i = 0; i < clients.length; i++) {
 			if (clients[i].ws === ws) {
@@ -52,6 +56,9 @@
 		}
 	}
 
+	// When a new user sends the connect event to the server.
+	// It's here that the user is added to the list of clients and
+	// their nickname is checked.
 	function connectEvent(event, ws) {
 		if (nicknameAvailable(event.data)) {
 			console.log(`${event.data} connected`);
@@ -79,6 +86,7 @@
 		}
 	}
 
+	// Broadcast a message to all connected users.
 	function broadcast(data) {
 		wss.clients.forEach(function each(client) {
 			if (client.readyState === WebSocket.OPEN) {
@@ -87,6 +95,7 @@
 		});
 	}
 
+	// Broadcast a message to all connected users except for the specified client.
 	function broadcastToOthers(ws, data) {
 		wss.clients.forEach(function each(client) {
 			if (client !== ws && client.readyState === WebSocket.OPEN) {
@@ -95,6 +104,7 @@
 		});
 	}
 
+	// Determine whether the nickname has already been taken.
 	function nicknameAvailable(nickname) {
 		for (let i = 0; i < clients.length; i++) {
 			if (clients[i].nickname.toLowerCase() === nickname.toLowerCase()) {

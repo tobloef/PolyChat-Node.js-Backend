@@ -18,6 +18,7 @@
   "homepage": "https://github.com/tobloef/PolyChat-Node.js-Backend#readme",
   "dependencies": {
     "express": "^4.15.2",
+    "mysql": "^2.13.0",
     "ws": "^2.2.2"
   }
 }

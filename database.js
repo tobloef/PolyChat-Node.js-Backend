@@ -5,6 +5,8 @@
 		config = require("./mysql_config");
 	} catch(exception) {}
 
+	const messageLimit = 1000;
+
 	let pool;
 
 	function open() {
@@ -61,8 +63,8 @@
 	}
 
 	function getMessages(successCallback, errorCallback) {
-		let query = "SELECT users.nickname, messages.message FROM messages INNER JOIN users ON messages.user_id=users.id";
-		executeQuery(query, null, successCallback, errorCallback);
+		let query = "SELECT users.nickname, messages.message FROM messages INNER JOIN users ON messages.user_id=users.id ORDER BY messages.id DESC LIMIT ?;";
+		executeQuery(query, messageLimit, successCallback, errorCallback);
 	}
 
 	function cleanup() {

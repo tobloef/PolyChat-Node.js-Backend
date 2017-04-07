@@ -13,7 +13,7 @@
         	return;
     	}
 
-    	const pool = mysql.createPool(config);
+    	pool = mysql.createPool(config);
     	console.log("Opened MySQL connection pool.");
 	}
 
@@ -27,7 +27,6 @@
 				console.error("Error getting connection from pool.\n" + error.stack);
 				return;
 			}
-			console.log("Executing query:\n" + query + "\n" + values);
 			connection.query(query, values, function(error, results, fields) {
 				connection.release();
 				if (error) {
@@ -41,12 +40,21 @@
 		});
 	}
 
-	function addMessage() {
-		// Todo
+	function insertMessage(message, callback) {
+		const query = "INSERT INTO messages SET ?";
+		const values = [message];
+		executeQuery(query, values, callback);
 	}
 
-	function addUser() {
-		// Todo
+	function insertUser(user, callback) {
+		const query = "INSERT INTO users SET ?";
+        const values = [user];
+        executeQuery(query, values, callback);
+	}
+
+	function getMessages(callback) {
+		let query = "SELECT users.username, messages.message FROM messages INNER JOIN users ON messages.user_id=users.id";
+		executeQuery(query, null, callback);
 	}
 
 	function cleanup() {
@@ -63,8 +71,9 @@
 	}
 
 	module.exports = {
-		addMessage,
-		addUser,
+		insertMessage,
+		insertUser,
+		getMessages,
 		cleanup,
 		open
 	}

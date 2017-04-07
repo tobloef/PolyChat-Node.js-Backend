@@ -1,5 +1,6 @@
 ;(function() {
 	const WebSocket = require("ws");
+	const database = require("./database");
 
 	const clients = [];
 	let wss;
@@ -7,7 +8,7 @@
 	// Set up WebSockets with for the sever.
 	function setup(server) {
 		wss = new WebSocket.Server({
-        	server
+        	server,
     	});
 
     	wss.on("connection", onConnection);
@@ -45,6 +46,9 @@
 
     // When the WebSocket recieves any message.
 	function onMessage(ws, message) {
+		if (message == null) {
+			return;
+		}
 		if (message == "ping") {
 			ws.send("pong");
 			return;
@@ -73,24 +77,29 @@
 	function connectEvent(ws, data) {
 		if (nicknameAvailable(data.nickname)) {
 			console.log(data.nickname + " connected");
-			clients.push({
-				nickname: data.nickname,
-				ws
+			database.insertUser({
+				username: data.nickname
+			}, function(results, fields) {
+				clients.push({
+            	    nickname: data.nickname,
+					userId: results.insertId,
+        	        ws
+    	        });
+	            ws.send(JSON.stringify({
+            	    type: "connectResponse",
+        	        data: "ready"
+    	        }));
+	            broadcast(JSON.stringify({
+            	    type: "onlineCount",
+        	        data: clients.length
+    	        }));
+	            broadcastToOthers(ws, JSON.stringify({
+                	type: "connected",
+                	data: {
+                    	nickname: data.nickname
+                	}
+            	}));
 			});
-			ws.send(JSON.stringify({
-                type: "connectResponse",
-                data: "ready"
-            }));
-            broadcast(JSON.stringify({
-                type: "onlineCount",
-                data: clients.length
-            }));
-            broadcastToOthers(ws, JSON.stringify({
-                type: "connected",
-                data: {
-					nickname: data.nickname
-				}
-            }));
 		} else {
 			ws.send(JSON.stringify({
                 type: "connectResponse",
@@ -103,11 +112,19 @@
 	function messageEvent(ws, data) {
 		for (let i = 0; i < clients.length; i++) {
 			if (clients[i].ws === ws) {
-                console.log(`${data.nickname}: ${data.message}`);
-				broadcastToOthers(ws, JSON.stringify({
-					type: "message",
-					data
-				}));
+                broadcastToOthers(ws, JSON.stringify({
+                   	type: "message",
+                	data: {
+						message: data.message,
+						nickname: clients[i].nickname
+					}
+                }));
+				console.log(`${clients[i].nickname}: ${data.message}`);
+				const message = {
+					user_id: clients[i].userId,
+					message: data.message
+				}
+				database.insertMessage(message);
 			}
 		}
 	}

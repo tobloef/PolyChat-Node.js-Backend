@@ -8,14 +8,12 @@
 	let cleanedUp = false;
 
 	app.use("/api", api);
-
 	const server = http.createServer(app);
 	websocket.setup(server);
-
+	database.open();
 	server.listen(3000, function(error) {
 		console.log("Started server on port " + server.address().port);
 	});
-
 	process.on("exit", cleanup);
 	process.on("SIGINT", cleanup);
 	process.on("uncaughtException", function(error) {

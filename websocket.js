@@ -78,7 +78,7 @@
 		if (nicknameAvailable(data.nickname)) {
 			console.log(data.nickname + " connected");
 			database.insertUser({
-				username: data.nickname
+				nickname: data.nickname
 			}, function(results, fields) {
 				clients.push({
             	    nickname: data.nickname,
@@ -99,6 +99,11 @@
                     	nickname: data.nickname
                 	}
             	}));
+			}, function(error) {
+				ws.send(JSON.stringify({
+					type: "connectResponse",
+					data: "error"
+				}));
 			});
 		} else {
 			ws.send(JSON.stringify({

@@ -3,7 +3,7 @@
 		connectionLimit : 10,
 		host            : "localhost",
 		user            : "root",
-		password        : "mcelroymysqlpassword",
+		password        : "6VCGRHY82Aj%",
 		database        : "polychat"
 	}
 }());

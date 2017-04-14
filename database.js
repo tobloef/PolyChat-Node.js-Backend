@@ -5,8 +5,6 @@
 		config = require("./mysql_config");
 	} catch(exception) {}
 
-	const messageLimit = 1000;
-
 	let pool;
 
 	function open() {
@@ -37,7 +35,7 @@
 			connection.query(query, values, function(error, results, fields) {
 				connection.release();
 				if (error) {
-					console.error("Error executing query.\n" + error.stack);
+					console.error("Error executing query:\n" + mysql.format(query, values) + "\n" + error.stack);
 					if (errorCallback) {
                 		errorCallback();
             		}
@@ -62,9 +60,14 @@
         executeQuery(query, values, successCallback, errorCallback);
 	}
 
-	function getMessages(successCallback, errorCallback) {
-		let query = "SELECT users.nickname, messages.message FROM messages INNER JOIN users ON messages.user_id=users.id ORDER BY messages.id DESC LIMIT ?;";
-		executeQuery(query, messageLimit, successCallback, errorCallback);
+	function getMessages(limit, successCallback, errorCallback) {
+		let query = "SELECT users.nickname, messages.message FROM messages INNER JOIN users ON messages.user_id=users.id ORDER BY messages.id DESC";
+		values = [];
+		if (limit != null) {
+			query += " LIMIT ?";
+			values.push(limit)
+		}
+		executeQuery(query, values, successCallback, errorCallback);
 	}
 
 	function cleanup() {

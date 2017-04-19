@@ -119,7 +119,7 @@
                    	type: "message",
                 	data: {
 						nickname: clients[i].nickname,
-						content: data
+						content: content
 					}
                 }));
 				console.log(`${clients[i].nickname}: ${content}`);

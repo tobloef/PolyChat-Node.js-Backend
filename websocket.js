@@ -72,14 +72,14 @@
 
 	// When a new user sends the connect event to the server.
 	// It's here that the user is added to the list of clients.
-	function connectEvent(ws, data) {
-		if (nicknameAvailable(data.nickname)) {
-			console.log(data.nickname + " connected");
+	function connectEvent(ws, nickname) {
+		if (nicknameAvailable(nickname)) {
+			console.log(nickname + " connected");
 			database.insertUser({
-				nickname: data.nickname
+				nickname: nickname
 			}, function(results, fields) {
 				clients.push({
-            	    nickname: data.nickname,
+            	    nickname: nickname,
 					userId: results.insertId,
         	        ws
     	        });
@@ -94,7 +94,7 @@
 	            broadcastToOthers(ws, JSON.stringify({
                 	type: "connected",
                 	data: {
-                    	nickname: data.nickname
+                    	nickname: nickname
                 	}
             	}));
 			}, function(error) {
@@ -175,5 +175,5 @@
 	module.exports = {
 		setup,
 		cleanup
-	}
+	};
 }());

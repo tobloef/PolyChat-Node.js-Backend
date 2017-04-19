@@ -31,9 +31,7 @@
 				console.log(clients[i].nickname + " diconnected");
 				broadcast(JSON.stringify({
 					type: "disconnected",
-					data: {
-						nickname: clients[i].nickname
-					}
+					data: clients[i].nickname
 				}));
 				clients.splice(i, 1);
 				broadcast(JSON.stringify({

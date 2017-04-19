@@ -18,11 +18,11 @@
         	}
 			if (amount < 0) {
 				res.status(400).send("Amount cannot be negative");
-				return
+				return;
 			}
 			if (amount > 1000) {
                 res.status(400).send("Amount cannot be above 1000");
-                return
+                return;
             }
 		} else {
 			amount = 1000;

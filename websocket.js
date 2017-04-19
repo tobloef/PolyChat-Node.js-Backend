@@ -112,21 +112,21 @@
 	}
 
 	// When the server recieves a new chat message.
-	function messageEvent(ws, data) {
+	function messageEvent(ws, content) {
 		for (let i = 0; i < clients.length; i++) {
 			if (clients[i].ws === ws) {
                 broadcastToOthers(ws, JSON.stringify({
                    	type: "message",
                 	data: {
-						message: data.message,
-						nickname: clients[i].nickname
+						nickname: clients[i].nickname,
+						content: data
 					}
                 }));
-				console.log(`${clients[i].nickname}: ${data.message}`);
+				console.log(`${clients[i].nickname}: ${content}`);
 				const message = {
 					user_id: clients[i].userId,
-					message: data.message
-				}
+					content
+				};
 				database.insertMessage(message);
 			}
 		}

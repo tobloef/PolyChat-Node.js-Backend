@@ -61,7 +61,7 @@
 	}
 
 	function getMessages(limit, successCallback, errorCallback) {
-		let query = "SELECT users.nickname, messages.message FROM messages INNER JOIN users ON messages.user_id=users.id ORDER BY messages.id DESC";
+		let query = "SELECT users.nickname, messages.content FROM messages INNER JOIN users ON messages.user_id=users.id ORDER BY messages.id DESC";
 		values = [];
 		if (limit != null) {
 			query += " LIMIT ?";

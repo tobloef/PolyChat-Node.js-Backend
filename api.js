@@ -4,6 +4,7 @@
 	const router = require("express").Router();
 
 	router.get("/ping", function(req, res) {
+		res.setHeader("Content-Type", "text/plain");
 		res.send("pong");
 	});
 
